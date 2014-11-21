@@ -13,7 +13,13 @@ func (s SortableItems) Len() int {
 }
 
 func (s SortableItems) Less(i, j int) bool {
-	return s[i].File < s[j].File
+	if s[i].File < s[j].File {
+        return true
+    } else if s[i].File == s[j].File {
+        return s[i].Key < s[j].Key
+    } else {
+        return false
+    }
 }
 
 func (s SortableItems) Swap(i, j int) {
