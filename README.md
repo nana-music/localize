@@ -1,0 +1,4 @@
+localize
+========
+
+.strings - .csv converter
