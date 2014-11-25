@@ -37,9 +37,17 @@ func MergeItems(dst map[string]Item, items []Item) {
 	for _, i := range items {
 		item, ok := dst[i.Key]
 		if ok {
+            if len(item.Comment) > 0 && len(i.Comment) > 0 && item.Comment != i.Comment {
+                fmt.Fprintf(os.Stderr, `warning: different comments found: key = %v, "%v" - "%v"`, i.Key, item.Comment, i.Comment)
+                fmt.Fprintln(os.Stderr)
+            }
+            if len(item.Comment) == 0 {
+                item.Comment = i.Comment
+            }
 			for k, v := range i.Localization {
 				item.Localization[k] = v
 			}
+            dst[i.Key] = item
 		} else {
 			dst[i.Key] = i
 		}
