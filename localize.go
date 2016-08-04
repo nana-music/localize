@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+var langs = []string{
+	"ja", "en", "th", "es", "fr", "vi", "zh-Hant",
+}
+
 type Item struct {
 	File         string
 	Key          string
@@ -24,30 +28,29 @@ func NewItem(filename string) *Item {
 }
 
 func (i Item) String() string {
-	return strings.Join([]string{
-		i.File,
-		i.Key,
-		i.Comment,
-		"ja = " + i.Localization["ja"],
-		"en = " + i.Localization["en"],
-	}, "\n")
+	components := []string{i.File, i.Key, i.Comment}
+	for _, l := range langs {
+		t := fmt.Sprintf("%v = %v", l, i.Localization[l])
+		components = append(components, t)
+	}
+	return strings.Join(components, "\n")
 }
 
 func MergeItems(dst map[string]Item, items []Item) {
 	for _, i := range items {
 		item, ok := dst[i.Key]
 		if ok {
-            if len(item.Comment) > 0 && len(i.Comment) > 0 && item.Comment != i.Comment {
-                fmt.Fprintf(os.Stderr, `warning: different comments found: key = %v, "%v" - "%v"`, i.Key, item.Comment, i.Comment)
-                fmt.Fprintln(os.Stderr)
-            }
-            if len(item.Comment) == 0 {
-                item.Comment = i.Comment
-            }
+			if len(item.Comment) > 0 && len(i.Comment) > 0 && item.Comment != i.Comment {
+				fmt.Fprintf(os.Stderr, `warning: different comments found: key = %v, "%v" - "%v"`, i.Key, item.Comment, i.Comment)
+				fmt.Fprintln(os.Stderr)
+			}
+			if len(item.Comment) == 0 {
+				item.Comment = i.Comment
+			}
 			for k, v := range i.Localization {
 				item.Localization[k] = v
 			}
-            dst[i.Key] = item
+			dst[i.Key] = item
 		} else {
 			dst[i.Key] = i
 		}

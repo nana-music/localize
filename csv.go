@@ -32,25 +32,22 @@ func WriteCsv(w io.Writer, items []Item) error {
 	writer := csv.NewWriter(w)
 	defer writer.Flush()
 
+	headers := []string{"File", "Key", "Comment"}
+	for _, l := range langs {
+		headers = append(headers, l)
+	}
+
 	//header
-	writer.Write([]string{
-		"File",
-		"Key",
-		"Comment",
-		"ja",
-		"en",
-	})
+	writer.Write(headers)
 
 	sort.Sort(SortableItems(items))
 
 	for _, item := range items {
-		err := writer.Write([]string{
-			item.File,
-			item.Key,
-			item.Comment,
-			item.Localization["ja"],
-			item.Localization["en"],
-		})
+		line := []string{item.File, item.Key, item.Comment}
+		for _, l := range langs {
+			line = append(line, item.Localization[l])
+		}
+		err := writer.Write(line)
 
 		if err != nil {
 			return err
@@ -72,8 +69,10 @@ func LoadCsv(r io.Reader) ([]Item, error) {
 		i := NewItem(record[0])
 		i.Key = record[1]
 		i.Comment = record[2]
-		i.Localization["ja"] = record[3]
-		i.Localization["en"] = record[4]
+
+		for idx, l := range langs {
+			i.Localization[l] = record[3+idx]
+		}
 
 		result = append(result, *i)
 		record, err = reader.Read()
