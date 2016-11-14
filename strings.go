@@ -72,11 +72,11 @@ func LoadStrings(name string) ([]Item, error) {
 				item.Comment = text
 			}
 		} else if key && strings.HasPrefix(text, "\"") {
-			item.Key = strings.Trim(text, "\"")
+			item.Key = trimQuote(text)
 		} else if text == "=" {
 			key = false
 		} else if !key && strings.HasPrefix(text, "\"") {
-			item.Localization[lang] = strings.Trim(text, "\"")
+			item.Localization[lang] = trimQuote(text)
 		} else if text == ";" {
 			result = append(result, *item)
 			item = NewItem(name)
@@ -131,4 +131,11 @@ func WriteStrings(root string, items []Item) error {
 		}
 	}
 	return nil
+}
+
+func trimQuote(s string) string {
+	if s[0] == '"' && s[len(s)-1] == '"' {
+		return s[1 : len(s)-1]
+	}
+	return s
 }
